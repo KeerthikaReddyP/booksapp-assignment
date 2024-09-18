@@ -9,6 +9,7 @@ function App() {
   const [users, setUsers] = useState([]);
 
 
+
   useEffect(() => {
     if (usersData && usersData.data) {
       setUsers(usersData.data);
@@ -19,13 +20,17 @@ function App() {
     setUsers((prevUsers) => [...prevUsers, newUser]);
   };
 
+  const handleEditUser=(userid,user)=>{
+    //EDit user
+  };
+
   return (
     <div className="m-10">
       <button
         onClick={() => {
           setIsModalOpen(true);
         }}
-        className="bg-blue-600 m-2 p-2"
+        className="bg-blue-800 m-2 p-2 text-white rounded-sm"
       >
         Add User
       </button>
@@ -39,7 +44,7 @@ function App() {
 
       {isLoading && <p>Loading...</p>}
 
-      <UsersDashboard users={users} />
+      <UsersDashboard users={users} handleEditUser={handleEditUser}/>
     </div>
   );
 }

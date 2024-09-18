@@ -1,29 +1,45 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { useAddUserMutation } from '../utils/usersApi';
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useAddUserMutation } from "../utils/usersApi";
 
-const UserModal = ({ onClose, handleAddUser }) => {
-  
-  const { register, handleSubmit, formState: { errors } } = useForm({
+const UserModal = ({ user, onClose, handleAddUser, handleEditUser }) => {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
-      first_name: '',
-      last_name: '',
-      email: ''
-    }
+      first_name: "",
+      last_name: "",
+      email: "",
+    },
   });
+  const [isEditing, setIsEditing] = useState(false);
   const [addUser] = useAddUserMutation();
 
+  useEffect(() => {
+    if (user) {
+      setValue("first_name", user.first_name);
+      setValue("last_name", user.last_name);
+      setValue("email", user.email);
+      setIsEditing(true);
+    }
+  }, [user, setValue]);
 
   const onSubmit = async (data) => {
     try {
-      const newUser = await addUser(data).unwrap();
-      handleAddUser(newUser);
+      if (isEditing) {
+        handleEditUser(user.id, data);
+      } else {
+        const newUser = await addUser(data).unwrap();
+        handleAddUser(newUser);
+      }
       onClose();
     } catch (error) {
       console.error("Failed to add user:", error);
     }
   };
-
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50">
@@ -31,44 +47,61 @@ const UserModal = ({ onClose, handleAddUser }) => {
         <h2 className="text-xl mb-4">Add user</h2>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-4">
-            <label htmlFor="first_name" className="block">First Name</label>
+            <label htmlFor="first_name" className="block">
+              First Name
+            </label>
             <input
               id="first_name"
               type="text"
-              {...register('first_name', { required: true })}
+              {...register("first_name", { required: true })}
               className="border p-2 w-full"
             />
-            {errors.first_name && <p className="text-red-500">First name is required.</p>}
+            {errors.first_name && (
+              <p className="text-red-500">First name is required.</p>
+            )}
           </div>
 
           <div className="mb-4">
-            <label htmlFor="last_name" className="block">Last Name</label>
+            <label htmlFor="last_name" className="block">
+              Last Name
+            </label>
             <input
               id="last_name"
               type="text"
-              {...register('last_name', { required: true })}
+              {...register("last_name", { required: true })}
               className="border p-2 w-full"
             />
-            {errors.last_name && <p className="text-red-500">Last name is required.</p>}
+            {errors.last_name && (
+              <p className="text-red-500">Last name is required.</p>
+            )}
           </div>
 
           <div className="mb-4">
-            <label htmlFor="email" className="block">Email</label>
+            <label htmlFor="email" className="block">
+              Email
+            </label>
             <input
               id="email"
               type="email"
-              {...register('email', { required: true })}
+              {...register("email", { required: true })}
               className="border p-2 w-full"
             />
             {errors.email && <p className="text-red-500">Email is required.</p>}
           </div>
 
           <div className="flex justify-end">
-            <button type="button" onClick={onClose} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2"
+            >
               Cancel
             </button>
-            <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-              Add
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              {isEditing?"Update":"Add"}
             </button>
           </div>
         </form>
